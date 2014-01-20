@@ -8,13 +8,14 @@ from pdfminer.pdfpage import PDFPage
 from cStringIO import StringIO
 
 
-def convert_pdf_to_txt(path):
+def get_pdf_text(path):
     """ Reads a pdf file and returns a dict of the text where the
         index represents the page number.
         http://stackoverflow.com/a/20905381
     """
     rsrcmgr = PDFResourceManager()
     retstr = StringIO()
+    # change to to utf-8 if the text comes out garbled
     codec = 'ascii'
     #codec = 'utf-8'
     laparams = LAParams()
@@ -26,14 +27,12 @@ def convert_pdf_to_txt(path):
     maxpages = 0
     caching = True
     pagenos=set()
-    for page in PDFPage.get_pages(fp, pagenos, maxpages=maxpages, password=password,caching=caching, check_extractable=True):
+    for page in PDFPage.get_pages(fp, pagenos, maxpages=maxpages, password=password, caching=caching, check_extractable=True):
         interpreter.process_page(page)
     fp.close()
     device.close()
     retstr.close()
     return pages
-
-
 
 def find_whole_word(needle, haystack, case_sensitive = False):
     """ Searches text for a whole word match. Ignores whitespace and punctuation.
@@ -54,21 +53,25 @@ def find_whole_word(needle, haystack, case_sensitive = False):
         return False
     return True
 
-start = time.clock()
-text_data = convert_pdf_to_txt("mature-optimization.pdf")
+def create_index(pdf_path, word_list):
+    """ Create a word index from pdf file
+    """
+    text_data = get_pdf_text(pdf_path)
+    word_index = {}
+    for page in text_data:
+        for word in words_list:
+            if find_whole_word(word, text_data[page]):
+                if word in word_index:
+                    word_index[word].append(page)
+                else:
+                    word_index[word] = [page]
+    return word_index
 
 words_list = ['this', 'This', 'foobard']
-word_index = {}
-for page in text_data:
-    for word in words_list:
-        if find_whole_word(word, text_data[page]):
-            if word in word_index:
-                word_index[word].append(page)
-            else:
-                word_index[word] = [page]
-
-for word in word_index:
-    print "%s: %s \n" % (word, word_index[word])
-
+start = time.clock()
+index = create_index("mature-optimization.pdf", words_list)
+for word in index:
+    print "%s: %s \n" % (word, index[word])
 end = time.clock()
+
 print "Finished in %f seconds" % (end - start)
