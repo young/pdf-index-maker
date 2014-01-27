@@ -12,7 +12,8 @@ Usage
     $ python setup.py install
 
 To make create an index, add the words to a text file separating each word with a newline.
-* Use the -w flag to indicate the location of the file to read the words list from. 
+
+* Use the -w flag to indicate the location of the file to read the words list from 
 * Use the -f flag to indicate the location of the pdf file
 * [Optional] Use the -o to indicate the file to output the index to (default: index.txt)
 * [Optional] Use the -p if you want the output printed to the console (default: False)
