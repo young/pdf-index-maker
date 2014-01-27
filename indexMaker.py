@@ -1,12 +1,45 @@
 import string
 import time
+import argparse
 
+from sys import argv
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.converter import TextConverter
 from pdfminer.layout import LAParams
 from pdfminer.pdfpage import PDFPage
 from cStringIO import StringIO
 
+
+class IndexMaker():
+    def __init__(self, args):
+        self.run(args)
+
+    def run(self, args):
+        try:
+            # get the word list and create a dict of words
+            words_list = [line.strip() for line in open(args.w)]
+        except IOError as e:
+            print e
+            exit()
+
+        # start the timer
+        start = time.clock()
+
+        # buil the index
+        index = create_index(args.f, words_list)
+
+        f = open(args.o,'w')
+
+        for word in index:
+            # write the index to a file
+            f.write("%s: %s \n" % (word, index[word]))
+            if args.p:
+                print "%s: %s \n" % (word, index[word]) 
+        f.close()
+
+        end = time.clock()
+
+        print "Finished in %f seconds" % (end - start)
 
 def get_pdf_text(path):
     """ Reads a pdf file and returns a dict of the text where the
@@ -44,6 +77,7 @@ def find_whole_word(needle, haystack, case_sensitive = False):
         index = haystack.find(needle)
     else:
         index = haystack.lower().find(needle.lower())
+
     if index == -1:
         return False
     if index != 0 and haystack[index-1].isalnum():
@@ -53,7 +87,7 @@ def find_whole_word(needle, haystack, case_sensitive = False):
         return False
     return True
 
-def create_index(pdf_path, word_list):
+def create_index(pdf_path, words_list):
     """ Create a word index from pdf file
     """
     text_data = get_pdf_text(pdf_path)
@@ -62,16 +96,19 @@ def create_index(pdf_path, word_list):
         for word in words_list:
             if find_whole_word(word, text_data[page]):
                 if word in word_index:
-                    word_index[word].append(page)
+                    word_index[word].append( (page * 2) - 4 )
                 else:
-                    word_index[word] = [page]
+                    word_index[word] = [(page * 2) - 4]
     return word_index
 
-words_list = ['this', 'This', 'foobard']
-start = time.clock()
-index = create_index("mature-optimization.pdf", words_list)
-for word in index:
-    print "%s: %s \n" % (word, index[word])
-end = time.clock()
 
-print "Finished in %f seconds" % (end - start)
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Creates an index of words from a PDF file.')
+    parser.add_argument('--version', action='version', version='0.02')
+    parser.add_argument('-o', default='index.txt', help='The file to output the index to')
+    parser.add_argument('-p', default=False, help='Print output to console')
+    parser.add_argument('-w', required=True, help='A text file of new line delimited words')
+    parser.add_argument('-f', required=True, help='The pdf file to create the index from')
+
+    args = parser.parse_args()
+    IndexMaker(args)

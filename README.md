@@ -1,7 +1,7 @@
 PDF Index Maker
 ========
 
-PDF Index Maker is a tool for creating an index for a PDF file.
+PDF Index Maker is a tool for creating an index from a PDF file.
 
 It uses a very slightly modified <a href="http://www.unixuser.org/~euske/python/pdfminer/">PDFMiner</a> to extract readable text from a pdf file along with page numbers of the text. PDF Index Maker takes a list of words, scans the text, and outputs every word (if it was found) along with the associated page numbers.
 
@@ -10,13 +10,15 @@ Usage
     $ git clone https://github.com/jemuelyoung/pdf-index-maker
     $ cd pdf-index-maker
     $ python setup.py install
-    $ python indexMaker.py
 
-To make create an index, simply add the words the words_list.
+To make create an index, add the words to a text file separating each word with a newline.
+    * Use the -w flag to indicate the location of the file to read the words list from. 
+    * Use the -f flag to indicate the location of the pdf file
+    * [Optional] Use the -o to indicate the file to output the index to (default: index.txt)
+    * [Optional] Use the -p if you want the output printed to the console (default: False)
 
-TODO
------
-* Get words list from command line
+    $ python indexMaker.py -w words.txt -f some_pdf.pdf -o output.txt
+
 
 
 License
