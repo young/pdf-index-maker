@@ -96,9 +96,9 @@ def create_index(pdf_path, words_list):
         for word in words_list:
             if find_whole_word(word, text_data[page]):
                 if word in word_index:
-                    word_index[word].append( (page * 2) - 4 )
+                    word_index[word].append(page)
                 else:
-                    word_index[word] = [(page * 2) - 4]
+                    word_index[word] = [page]
     return word_index
 
 
